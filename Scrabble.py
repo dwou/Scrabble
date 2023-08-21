@@ -135,69 +135,6 @@ if 1:
             card = base + '$' + '<br>'.join(words_newdescs[base])
             f.write(card+'\n')
 
-if 0:
-    for line in lines:
-        # Check for lines containing <>
-        if '<' in line:
-            match = re.search(r'<(.*?)=([\w\s]+)>', line)
-            if match:
-                word, part_of_speech = match.group(1), match.group(2)
-                transformed_line = f"{word.upper()}\t{part_of_speech}. {word_data.get(word, '')}"
-
-        # Check for lines containing {}
-        elif '{' in line:
-            match = re.search(r'\{(.*?)=([\w\s]+)\}', line)
-            if match:
-                word, part_of_speech = match.group(1), match.group(2)
-                transformed_line = f"{word.upper()}\t{part_of_speech}. {word_data.get(word, '')}"
-
-        # Lines without <> or {}
-        else:
-            word = re.match(r'(\w+)', line).group(1)
-            part_of_speech_match = re.search(r'\[([\w\s]+)\]', line)
-            if part_of_speech_match:
-                part_of_speech = part_of_speech_match.group(1)
-                print(word,part_of_speech)
-                transformed_line = f"{word}\tn. {line[line.find(word):].strip()}"
-            else:
-                transformed_line = f"{word}\tn. {line[line.find(word):].strip()}"
-        print(f'Orig:\t{repr(line)}')
-        print(f'Trans:\t{repr(transformed_line)}')
-        counter += 1
-        if counter >= 280:
-            break
-
-
-if 0:
-    # create file with words/descriptions by frequency if words are official
-    with open('words_desc_sorted.csv','w') as f_out:
-        with open('unigram_freq.csv','r') as f_in:
-            lines = f_in.readlines()[1:]
-            for line in lines:
-                word = line[:line.find(',')]
-                if word.upper() in words_and_desc:
-                    out = f'{word.upper()}\t{words_and_desc[word.upper()].capitalize()}'
-                    f_out.write(out)
-
-if 0:
-    # just replace first space with \t
-    with open('words_desc.csv','w') as f_out:
-        for word in words:
-            out = f'{word}\t{words_and_desc[word].capitalize()}'
-            f_out.write(out)
-
-if 0:
-    # replace first space with \t and show alt spelling definition
-    with open('words_desc_2.csv','w') as f_out:
-        for word in words:
-            desc = words_and_desc[word]
-            if '=' in desc:
-                desc 
-            out = f'{word}\t{words_and_desc[word].capitalize()}'
-            f_out.write(out)
-
-
-
 
 
 
