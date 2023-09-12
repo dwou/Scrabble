@@ -74,51 +74,6 @@ def get_desc(meaning): # doesn't fill in {} <>
         return desc
     return '(no description)'
 
-def remake_desc(meaning): # multiple meanings allowed
-    POS = get_POS(meaning)
-    endpart = get_endpart(meaning)
-    if ' / ' in meaning:
-        meaning_1 = re.search(r'^(.*?)(?=\s/\s|$)', meaning).group(1)
-        meanings = (meaning_1,) + tuple(re.findall(r'\s/\s(.*?)(?=\s/\s|$)', line))
-        ret_meanings = [ remake_desc(i) for i in meanings ]
-        return ret_meanings[0]
-    # Test if word 
-    if '{' in meaning: # Synonym
-            # Ex: "AD an {advertisement=n} [n ADS]"
-        root = re.search(r'{(.*?)=', meaning).group(1).upper()
-        if root in mentioned_here:
-            return meaning
-        mentioned_here.append(root)
-        root_POS = get_POS(words_and_desc[root])
-        try:
-            root_desc = re.search(r'^(.*?)\s\[', words_and_desc[root]).group(1)
-        except:
-            root_desc = '(no description)'
-        curly_part = re.search(r'{.*?}', meaning).group()
-        desc = re.search(r'^(.*?)\s\[', meaning).group(1)
-        replace_text = f'{root.upper()} ({root_POS}) {root_desc}' # to replace {} text
-        new_desc = f'{desc.replace(curly_part,replace_text)} {endpart}'
-    elif '<' in meaning: # Pointer to root word
-        root = re.search(r'<(.*?)=', meaning).group(1).upper()
-        if root in mentioned_here:
-            return root
-        mentioned_here.append(meaning)
-        root_POS = get_POS(words_and_desc[root])
-        try:
-            root_desc = re.search(r'^(.*?)\s\[', words_and_desc[root]).group(1)
-        except:
-            root_desc = '(no description)'
-        angle_part = re.search(r'<.*?>', meaning).group()
-        desc = re.search(r'^(.*?)\s\[', meaning).group(1)
-        replace_text = f'{root.upper()} ({root_POS}) {root_desc}' # to replace <> text
-        new_desc = f'{desc.replace(angle_part,replace_text)} {endpart}'
-    else: # Done, passes all checks first try
-        return meaning
-    # Last test after 1, 2, and 3
-    if ('{' not in new_desc) and ('<' not in new_desc):
-        return new_desc
-    return remake_desc(new_desc) # New Iteration
-
 
 def remake_desc2(meaning): # multiple meanings not allowed; non-recursive; for new code
     endpart = get_endpart(meaning)
@@ -371,59 +326,4 @@ if 1:
         to_parse.remove(group)
         
         #card = base + '$' + '<br>'.join(words_newdescs[base]) + '\n'
-
-
-if 0: # old code
-    # Line to word and new description(s)
-    with open('outfile2.txt','w') as f:
-        for line in lines:
-            # Capture base word and first meaning from line
-            base,meaning_1 = re.search(r'^(.*?)\s(.*?)(?=\s/\s|$)', line).groups()
-
-            # Captures all additional meanings, if there are any
-            meanings = (meaning_1,) + tuple(re.findall(r'\s/\s(.*?)(?=\s/\s|$)', line))
-
-            # To prevent recursion errors
-            mentioned_here = [] 
-
-            # Reformat descriptions and map new descriptions to words_newdescs
-            out_descs = [remake_desc(meaning) for meaning in meanings]
-            words_newdescs[base] = tuple(out_descs)
-            
-            # Test if line not formatted correctly
-            if '$' in words_newdescs[base]:
-                print(base)
-                print(words_newdescs[base])
-
-            # Map each word to its description(s) by POS
-            try:
-                words_pos_desc[base] = {}
-                for i in tuple(out_descs):
-                    POS = get_POS(i)
-                    if POS not in words_pos_desc[base]:
-                        words_pos_desc[base][POS] = []
-                    words_pos_desc[base][POS].append(i)
-            except: # A form in description repeats
-                # It looks like it's always alternate spellings
-                # and can be ignored
-                
-                print(base,words_pos_desc[base])
-            
-            '''
-            if len(words_newdescs[base]) >= 4:
-                print(base)
-                for i,j in enumerate(words_newdescs[base]):
-                    print(f'  {i+1}: {j}')
-            '''
-
-            # I don't think this should be here
-            #words_newdescs[base] = [ i for i in words_newdescs[base] ]
-            
-            # '$' delimiter ; add breaks for Anki ; must have HTML enabled
-            card = base + '$' + '<br>'.join(words_newdescs[base]) + '\n'
-            f.write(card)
-
-#print(words_pos_desc['FLY'])
-
-
 
